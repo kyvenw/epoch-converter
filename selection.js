@@ -27,7 +27,7 @@ function processSelection(e) {
       text = text / 1000;
     }
     var date = timestampToDate(text);
-    showBubble(e, getLocalString(date), getUTCString(date));
+    showBubble(e, getLocalString(date), getPTLocalString(date), getUTCString(date));
   }
 }
 
@@ -43,28 +43,63 @@ function getSelectedText() {
   return text;
 }
 
+const LOCAL_FORMATTER = Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'longOffset',
+})
+
+const LA_FORMATTER = Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'longOffset',
+})
+
+const UTC_FORMATTER = Intl.DateTimeFormat('en-US', {
+    timeZone: 'GMT',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'longOffset',
+})
+
 function timestampToDate(ts) {
   ts = ts.length === 13 ? parseInt(ts) : ts * 1000;
   return new Date(ts);
 }
 
 function getLocalString(date) {
-  tz = date.getTimezoneOffset()
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} GMT${tz < 0 ? '+' : '-'}${pad(Math.floor(tz / 60))}:${pad(tz % 60)}`
+  return LOCAL_FORMATTER.format(date)
+}
+
+function getPTLocalString(date) {
+  return LA_FORMATTER.format(date)
 }
 
 function getUTCString(date) {
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())} GMT`
+  return UTC_FORMATTER.format(date)
 }
 
 function pad(v) {
   return v.toString().padStart(2, '0')
 }
 
-function showBubble(e, localDateStr, utcDateStr) {
+function showBubble(e, localDateStr, ptDateStr, utcDateStr) {
   $('#ec-bubble').css('top', e.pageY + 20 + "px");
   $('#ec-bubble').css('left', e.pageX - 85 + "px");
-  $('#ec-bubble-text').html(localDateStr + '<br/>' + utcDateStr);
+  $('#ec-bubble-text').html(localDateStr + '<br/>' + ptDateStr + '<br/>' + utcDateStr);
   $('#ec-bubble').css('visibility', 'visible');
 }
 
